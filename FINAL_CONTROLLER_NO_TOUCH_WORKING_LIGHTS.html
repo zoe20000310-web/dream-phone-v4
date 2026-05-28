@@ -1,0 +1,994 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+<title>The Dream Remembers — Final Dream Body Link</title>
+<style>
+  html, body {
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:
+      radial-gradient(circle at 50% 18%, rgba(255,230,185,.12), rgba(255,255,255,0) 28%),
+      radial-gradient(circle at 50% 42%, rgba(115,155,220,.20), rgba(255,255,255,0) 42%),
+      linear-gradient(180deg, #05070b, #000);
+    color:rgba(245,240,230,.88);
+    font-family: Georgia, serif;
+    touch-action:none;
+  }
+  .wrap {
+    min-height:100%;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    padding:30px 22px 26px;
+    box-sizing:border-box;
+  }
+  .top {
+    text-align:center;
+  }
+  h1 {
+    margin:0 0 10px;
+    font-size:19px;
+    font-weight:400;
+    letter-spacing:5px;
+    text-transform:uppercase;
+    color:rgba(255,245,226,.92);
+  }
+  p {
+    margin:0;
+    font-size:12px;
+    line-height:1.75;
+    color:rgba(220,225,235,.64);
+    letter-spacing:.7px;
+  }
+  .card {
+    position:relative;
+    border:1px solid rgba(255,255,255,.115);
+    border-radius:30px;
+    background:
+      radial-gradient(circle at 50% 0%, rgba(255,235,200,.075), rgba(255,255,255,0) 38%),
+      linear-gradient(145deg, rgba(255,255,255,.060), rgba(255,255,255,.018));
+    backdrop-filter: blur(16px);
+    padding:20px 18px 18px;
+    box-shadow:
+      0 0 45px rgba(95,140,220,.10),
+      inset 0 0 28px rgba(255,255,255,.020),
+      inset 0 1px 0 rgba(255,255,255,.06);
+  }
+  .label {
+    text-align:center;
+    font-size:9px;
+    letter-spacing:3.5px;
+    color:rgba(255,226,190,.68);
+    margin-bottom:10px;
+    text-transform:uppercase;
+  }
+  input {
+    width:100%;
+    box-sizing:border-box;
+    margin:16px 0 12px;
+    border-radius:999px;
+    border:1px solid rgba(255,235,210,.20);
+    background:rgba(255,255,255,.045);
+    color:rgba(255,245,230,.94);
+    padding:14px 16px;
+    font-size:16px;
+    letter-spacing:2.4px;
+    outline:none;
+    text-align:center;
+    font-family:Georgia,serif;
+  }
+  input::placeholder {
+    color:rgba(230,230,235,.35);
+  }
+  button {
+    width:100%;
+    border-radius:999px;
+    border:1px solid rgba(255,235,210,.24);
+    background:linear-gradient(180deg, rgba(255,245,230,.105), rgba(255,245,230,.045));
+    color:rgba(255,245,230,.9);
+    padding:14px 16px;
+    font-family:Georgia,serif;
+    letter-spacing:2.4px;
+    font-size:12px;
+  }
+  .orb {
+    width:220px;
+    height:220px;
+    border-radius:50%;
+    margin:24px auto 20px;
+    border:1px solid rgba(255,255,255,.13);
+    background:
+      radial-gradient(circle at 42% 34%, rgba(255,235,190,.30), rgba(150,200,255,.13) 38%, rgba(190,160,230,.06) 58%, rgba(255,255,255,0) 100%);
+    box-shadow:
+      0 0 70px rgba(130,180,255,.18),
+      0 0 120px rgba(255,210,160,.05),
+      inset 0 0 45px rgba(255,255,255,.060);
+    transform:scale(var(--scale,1));
+    transition:transform .12s linear, box-shadow .2s linear;
+  }
+  .orb:active {
+    box-shadow:
+      0 0 85px rgba(255,220,180,.22),
+      0 0 140px rgba(130,180,255,.12),
+      inset 0 0 55px rgba(255,255,255,.085);
+  }
+  .readout {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:14px;
+  }
+  .meter {
+    border:1px solid rgba(255,255,255,.08);
+    border-radius:18px;
+    padding:11px 10px;
+    color:rgba(230,235,245,.62);
+    font-size:9px;
+    letter-spacing:1.8px;
+    background:rgba(255,255,255,.020);
+  }
+  .meter b {
+    display:block;
+    color:rgba(255,232,198,.80);
+    font-weight:400;
+    margin-top:6px;
+    font-size:14px;
+    letter-spacing:1.4px;
+  }
+  .status {
+    margin-top:13px;
+    text-align:center;
+    color:rgba(255,232,198,.75);
+    font-size:11px;
+    letter-spacing:1.6px;
+  }
+  .hint {
+    text-align:center;
+    font-size:11px;
+    color:rgba(220,225,235,.55);
+    line-height:1.85;
+    padding-bottom:2px;
+  }
+  .explain {
+    margin-top:14px;
+    padding:13px 14px;
+    border:1px solid rgba(255,255,255,.075);
+    border-radius:20px;
+    background:rgba(255,255,255,.022);
+    color:rgba(225,232,242,.62);
+    font-size:10.5px;
+    line-height:1.75;
+    letter-spacing:.7px;
+  }
+  .explain b {
+    display:block;
+    margin-bottom:6px;
+    color:rgba(255,226,190,.72);
+    font-weight:400;
+    letter-spacing:2.4px;
+    text-transform:uppercase;
+    font-size:8.5px;
+  }
+  .steps {
+    margin-top:12px;
+    display:grid;
+    gap:7px;
+  }
+  .step {
+    display:flex;
+    gap:8px;
+    align-items:flex-start;
+    color:rgba(230,236,246,.66);
+    font-size:10.5px;
+    line-height:1.55;
+  }
+  .num {
+    min-width:18px;
+    height:18px;
+    border-radius:50%;
+    border:1px solid rgba(255,235,210,.16);
+    color:rgba(255,232,198,.70);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:9px;
+  }
+
+  .portrait-note {
+    margin-top:10px;
+    text-align:center;
+    color:rgba(255,232,198,.58);
+    font-size:10px;
+    letter-spacing:1.5px;
+  }
+
+  #code { display:none !important; }
+
+.memory-touch{
+  margin-top:10px;
+  border:1px solid rgba(255,255,255,.08);
+  border-radius:18px;
+  padding:12px;
+  background:rgba(255,255,255,.02);
+  text-align:center;
+}
+.memory-title{
+  font-size:10px;
+  letter-spacing:3px;
+  color:rgba(255,232,198,.75);
+  margin-bottom:8px;
+}
+.memory-desc{
+  font-size:10px;
+  line-height:1.7;
+  color:rgba(225,232,242,.62);
+}
+
+.disconnect-btn{
+  margin-top:10px !important;
+  background:rgba(255,255,255,.025)!important;
+  color:rgba(230,220,210,.62)!important;
+  border-color:rgba(255,255,255,.10)!important;
+}
+
+/* MOBILE_COMPACT_FIX */
+@media (max-width: 700px){
+  html, body{
+    min-height:100%;
+    height:auto !important;
+    overflow-y:auto !important;
+    overflow-x:hidden !important;
+  }
+
+  body{
+    padding:14px 12px 28px !important;
+    box-sizing:border-box !important;
+  }
+
+  h1{
+    font-size:24px !important;
+    letter-spacing:7px !important;
+    margin:8px 0 10px !important;
+  }
+
+  p{
+    font-size:12px !important;
+    line-height:1.45 !important;
+    margin:6px auto !important;
+  }
+
+  .panel,
+  .card,
+  .controller,
+  .connect-panel,
+  .main-panel{
+    width:100% !important;
+    max-width:calc(100vw - 24px) !important;
+    padding:14px 14px !important;
+    margin:10px auto !important;
+    border-radius:24px !important;
+    box-sizing:border-box !important;
+  }
+
+  button,
+  #connect,
+  #disconnect{
+    height:46px !important;
+    min-height:46px !important;
+    font-size:13px !important;
+    letter-spacing:4px !important;
+    margin:8px 0 !important;
+  }
+
+  .status,
+  #status{
+    font-size:12px !important;
+    letter-spacing:3px !important;
+    margin:10px 0 !important;
+  }
+
+  .orb,
+  #orb{
+    width:210px !important;
+    height:210px !important;
+    max-width:58vw !important;
+    max-height:58vw !important;
+    margin:18px auto !important;
+  }
+
+  .memory-touch{
+    padding:10px 12px !important;
+    margin:10px 0 !important;
+  }
+
+  .memory-title{
+    font-size:10px !important;
+    letter-spacing:3px !important;
+    margin-bottom:6px !important;
+  }
+
+  .memory-desc{
+    font-size:11px !important;
+    line-height:1.45 !important;
+  }
+
+  .metrics,
+  .readouts,
+  .data-grid,
+  .grid{
+    display:grid !important;
+    grid-template-columns:1fr 1fr !important;
+    gap:10px !important;
+    margin-top:12px !important;
+    padding-bottom:20px !important;
+  }
+
+  .metric,
+  .readout,
+  .data-box,
+  .cell{
+    min-height:58px !important;
+    padding:10px 12px !important;
+    box-sizing:border-box !important;
+  }
+
+  .metric span,
+  .readout span,
+  .data-box span,
+  .cell span{
+    font-size:10px !important;
+    letter-spacing:3px !important;
+  }
+
+  .metric strong,
+  .readout strong,
+  .data-box strong,
+  .cell strong{
+    font-size:18px !important;
+  }
+}
+
+/* iPhone Safari height fix */
+@supports (-webkit-touch-callout: none){
+  @media (max-width:700px){
+    body{
+      padding-bottom:80px !important;
+    }
+  }
+}
+
+
+/* MEMORY_LIGHT_BUTTON_STYLE */
+.memory-action-row{
+  margin:10px auto 8px !important;
+  display:flex !important;
+  flex-direction:column !important;
+  align-items:center !important;
+  gap:6px !important;
+}
+.memory-light-btn{
+  width:auto !important;
+  min-width:170px !important;
+  height:38px !important;
+  min-height:38px !important;
+  padding:0 18px !important;
+  border-radius:999px !important;
+  font-size:10px !important;
+  letter-spacing:3px !important;
+  background:rgba(255,255,255,.045) !important;
+  color:rgba(255,238,215,.82) !important;
+  border:1px solid rgba(255,255,255,.14) !important;
+  box-shadow:0 0 22px rgba(255,230,190,.06) !important;
+}
+.memory-light-hint{
+  font-size:9px !important;
+  letter-spacing:1.5px !important;
+  color:rgba(235,225,215,.48) !important;
+  text-align:center !important;
+}
+@media (max-width:700px){
+  .memory-light-btn{
+    height:34px !important;
+    min-height:34px !important;
+    font-size:9px !important;
+    letter-spacing:2.5px !important;
+    margin:4px 0 !important;
+  }
+  .memory-action-row{
+    margin:6px auto 6px !important;
+  }
+}
+
+/* FINAL_PHONE_LAYOUT_SHRINK_TOUCH */
+@media (max-width:700px){
+  .wrap{
+    padding:18px 14px 120px !important;
+    justify-content:flex-start !important;
+    gap:10px !important;
+  }
+  .top{ margin-bottom:4px !important; }
+  h1{
+    font-size:22px !important;
+    letter-spacing:6px !important;
+    margin:4px 0 8px !important;
+  }
+  .top p{
+    font-size:11px !important;
+    line-height:1.35 !important;
+    max-width:92vw !important;
+  }
+  .card{
+    padding:12px 14px 14px !important;
+    border-radius:22px !important;
+    margin:8px auto 0 !important;
+  }
+  .label{
+    font-size:8px !important;
+    letter-spacing:2.6px !important;
+    margin-bottom:6px !important;
+  }
+  .card > p{
+    font-size:10.5px !important;
+    line-height:1.35 !important;
+    margin-bottom:8px !important;
+  }
+  button,#connect,#disconnect{
+    height:40px !important;
+    min-height:40px !important;
+    padding:8px 12px !important;
+    font-size:11px !important;
+    letter-spacing:3px !important;
+    margin:6px 0 !important;
+  }
+  #status{
+    font-size:11px !important;
+    letter-spacing:3px !important;
+    margin:8px 0 !important;
+  }
+  #orb,.orb{
+    width:150px !important;
+    height:150px !important;
+    max-width:42vw !important;
+    max-height:42vw !important;
+    margin:10px auto 10px !important;
+  }
+  .memory-action-row{ margin:4px auto 4px !important; gap:3px !important; }
+  .memory-light-btn{
+    min-width:150px !important;
+    height:30px !important;
+    min-height:30px !important;
+    font-size:8.5px !important;
+    letter-spacing:2.4px !important;
+    padding:0 14px !important;
+  }
+  .memory-light-hint{
+    font-size:8px !important;
+    letter-spacing:1px !important;
+  }
+  .memory-touch{
+    padding:8px 10px !important;
+    margin:6px 0 !important;
+    border-radius:16px !important;
+  }
+  .memory-title{
+    font-size:8.5px !important;
+    letter-spacing:2.4px !important;
+    margin-bottom:4px !important;
+  }
+  .memory-desc{
+    font-size:9.5px !important;
+    line-height:1.28 !important;
+  }
+  .explain{ display:none !important; }
+  .hint{ display:none !important; }
+  .readout{
+    grid-template-columns:1fr 1fr !important;
+    gap:8px !important;
+    margin-top:8px !important;
+    padding-bottom:110px !important;
+  }
+  .meter{
+    min-height:48px !important;
+    padding:8px 10px !important;
+    font-size:8.5px !important;
+    letter-spacing:1.4px !important;
+  }
+  .meter b{
+    margin-top:4px !important;
+    font-size:13px !important;
+  }
+}
+
+
+/* FINAL_HIDE_TOUCH_METER */
+.readout{
+  grid-template-columns:1fr 1fr !important;
+}
+@media (max-width:700px){
+  .readout{
+    grid-template-columns:1fr 1fr !important;
+    padding-bottom:86px !important;
+  }
+}
+</style>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
+// memory tap pulse: one tap creates a visible memory light on the main screen
+window.__memoryTapPulse = function(){
+  try{
+    touch = 1;
+    setTimeout(()=>{ touch = 0; }, 260);
+  }catch(e){}
+};
+if(typeof orb !== "undefined" && orb){
+  orb.addEventListener("click", function(){
+    window.__memoryTapPulse();
+  });
+}
+</script>
+<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <h1>Dream Body Link</h1>
+    <p>This page turns your phone into a body sensor for the dream space. Your movement becomes part of the work.</p>
+  </div>
+  <div class="card">
+    <div class="label">Auto Connect To Dream Space</div><p>Tap Connect to wake the dream. Tap the orb to add memory lights. Hold the orb to enter the tunnel.</p>
+    <input id="code" placeholder="dream-xxxxx" autocomplete="off" autocapitalize="none" />
+    <button id="connect">CONNECT BODY LINK</button>
+    <button id="disconnect" class="disconnect-btn">DISCONNECT</button>
+    <div class="status" id="status">Waiting To Connect</div>
+    
+<div class="orb" id="orb"></div>
+
+<div class="memory-action-row">
+  <button id="memoryLightBtn" class="memory-light-btn" type="button">ADD MEMORY LIGHT</button>
+  <div class="memory-light-hint">Tap To Add A Dream Light · Hold To Clear All</div>
+</div>
+
+
+<div class="memory-touch">
+  <div class="memory-title">MEMORY TOUCH</div>
+  <div class="memory-desc">
+    Tap the orb to leave a brief memory trace inside the dream.<br>
+    Hold the orb to descend into the dream tunnel.<br>
+    Release to slowly return.
+  </div>
+</div>
+
+    <div class="readout">
+      <div class="meter">Motion<b id="motionV">0%</b></div>
+      <div class="meter">Breath<b id="breathV">0%</b></div>
+      <div class="meter">Body Rhythm<b id="heartV">0%</b></div>
+      <div class="meter">Tilt X<b id="tiltXV">0%</b></div>
+    </div>
+
+    <div class="explain">
+      <b>Principle</b>
+      This web prototype uses your phone’s motion and orientation sensors to estimate body rhythm, breath-like movement, touch, and motion. These signals are sent to the main dream page in real time, where they affect drifting, breathing, splitting, and entering the tunnel.
+      <br><br>
+      Apple Watch is not required for this version. A future enhanced version could connect real heart-rate data through Apple Watch / HealthKit, but this page currently does not record audio, video, or real medical heart data.
+    </div>
+  </div>
+  <div class="hint">Phone Portrait Mode Recommended<br>Tap The Orb To Add A Memory Light<br>Hold To Enter The Dream Tunnel<br>Release To Return</div>
+</div>
+<script>
+let motion=0, breath=0, heart=0, tiltX=0, tiltY=0, touch=0;
+let lastAccel={x:0,y:0,z:0}, breathPhase=0;
+let db=null, connected=false;
+const orb=document.getElementById("orb");
+
+function setStatus(t){document.getElementById("status").textContent=t;}
+
+
+const firebaseConfig = {
+  apiKey: "AIzaSyAodE6XdIzBC2l6t0FOU9MUus5_kiDoU",
+  authDomain: "dreamremembers-79da3.firebaseapp.com",
+  databaseURL: "https://dreamremembers-79da3-default-rtdb.firebaseio.com",
+  projectId: "dreamremembers-79da3",
+  storageBucket: "dreamremembers-79da3.firebasestorage.app",
+  messagingSenderId: "725634165864",
+  appId: "1:725634165864:web:6c5521ec1c004938fb5fdd",
+  measurementId: "G-7781Y6K5RP"
+};
+
+
+try {
+  if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
+} catch(err) {
+  console.warn(err);
+  setStatus("Firebase Init Error");
+}
+
+async function requestMotionPermission(){
+  if(typeof DeviceMotionEvent!=="undefined" && typeof DeviceMotionEvent.requestPermission==="function"){
+    const res=await DeviceMotionEvent.requestPermission();
+    if(res!=="granted") throw new Error("Motion permission denied");
+  }
+  if(typeof DeviceOrientationEvent!=="undefined" && typeof DeviceOrientationEvent.requestPermission==="function"){
+    await DeviceOrientationEvent.requestPermission().catch(()=>{});
+  }
+}
+
+document.getElementById("connect").addEventListener("click", async()=>{
+  try{
+    await requestMotionPermission();
+    connected = true;
+    setStatus("Connected · Sending Body Data");
+  }catch(e){
+    connected = true;
+    setStatus("Connected · Motion Permission Limited");
+  }
+});
+
+window.addEventListener("devicemotion",e=>{
+  const a=e.accelerationIncludingGravity||e.acceleration||{x:0,y:0,z:0};
+  const dx=(a.x||0)-lastAccel.x, dy=(a.y||0)-lastAccel.y, dz=(a.z||0)-lastAccel.z;
+  const raw=Math.sqrt(dx*dx+dy*dy+dz*dz);
+  lastAccel={x:a.x||0,y:a.y||0,z:a.z||0};
+  motion += (Math.min(1,raw/18)-motion)*.16;
+  const slow=Math.abs((a.y||0)+(a.z||0)*.25);
+  breath += (Math.min(1,Math.max(0,(slow-5.5)/5.5))-breath)*.035;
+});
+
+window.addEventListener("deviceorientation",e=>{
+  tiltX += (Math.max(-1,Math.min(1,(e.gamma||0)/45))-tiltX)*.10;
+  tiltY += (Math.max(-1,Math.min(1,(e.beta||0)/70))-tiltY)*.10;
+});
+
+orb.addEventListener("touchstart",e=>{e.preventDefault(); touch=1;},{passive:false});
+orb.addEventListener("touchend",e=>{e.preventDefault(); touch=0;},{passive:false});
+
+orb.addEventListener("click",()=>{
+  touch = 1;
+  setTimeout(()=>{ touch = 0; }, 180);
+});
+orb.addEventListener("mousedown",()=>touch=1);
+orb.addEventListener("mouseup",()=>touch=0);
+
+let lastSend=0;
+function loop(){
+  breathPhase += .018;
+  const autoBreath=(Math.sin(breathPhase)*.5+.5)*.22;
+  const finalBreath=Math.max(autoBreath,breath);
+  const bodyRhythm=Math.min(1, finalBreath*.62 + motion*.30 + touch*.12);
+  heart += (bodyRhythm-heart)*.08;
+
+  motion*=.975;
+  touch += (((touch>0.5)?1:0)-touch)*.2;
+
+  document.documentElement.style.setProperty("--scale",(1+finalBreath*.12+touch*.16+motion*.08).toFixed(3));
+  document.getElementById("motionV").textContent=Math.round(motion*100)+"%";
+  document.getElementById("breathV").textContent=Math.round(finalBreath*100)+"%";
+  if(document.getElementById("heartV")) document.getElementById("heartV").textContent=Math.round(heart*100)+"%";
+  document.getElementById("tiltXV").textContent=Math.round((tiltX*.5+.5)*100)+"%";
+  if(document.getElementById("touchV")) document.getElementById("touchV").textContent=Math.round(touch*100)+"%";
+
+  if(connected && db && performance.now()-lastSend>55){
+    lastSend=performance.now();
+    db.ref("dreamBody/current").set({
+      t: Date.now(),
+      motion,
+      breath: finalBreath,
+      heart,
+      tiltX,
+      tiltY,
+      touch
+    }).catch(err=>{
+      console.warn(err);
+      setStatus("Firebase Write Error");
+    });
+  }
+
+  requestAnimationFrame(loop);
+}
+loop();
+</script>
+
+
+
+
+
+
+
+
+
+
+<!-- FINAL CONTROLLER VERSION -->
+
+<script>
+// TIMESTAMP_CONNECT_WAKE_CONTROLLER
+(function(){
+  function getDb(){
+    if(typeof firebase === "undefined"){
+      console.warn("Firebase SDK missing on controller.");
+      return null;
+    }
+    
+const firebaseConfig = {
+  apiKey: "AIzaSyAodE6XdIzBC2l6t0FOU9MUus5_kiDoU",
+  authDomain: "dreamremembers-79da3.firebaseapp.com",
+  databaseURL: "https://dreamremembers-79da3-default-rtdb.firebaseio.com",
+  projectId: "dreamremembers-79da3",
+  storageBucket: "dreamremembers-79da3.firebasestorage.app",
+  messagingSenderId: "725634165864",
+  appId: "1:725634165864:web:6c5521ec1c004938fb5fdd",
+  measurementId: "G-7781Y6K5RP"
+};
+
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    return firebase.database();
+  }
+
+  function connectDream(){
+    try{
+      const db = getDb();
+      if(!db) return;
+      const now = Date.now();
+
+      db.ref("dreamBody/connectSignal").set({
+        connected:true,
+        connectedAt:now,
+        t:now,
+        source:"phone-connect"
+      });
+
+      db.ref("dreamBody/current").update({
+        connected:true,
+        connectedAt:now,
+        activeAt:now,
+        t:now,
+        motion:0.16,
+        breath:0.22,
+        heart:0.18,
+        touch:0
+      });
+
+      const s = document.getElementById("status");
+      if(s) s.textContent = "Connected · Dream Awakened";
+
+      if(window.__connectKeepAlive) clearInterval(window.__connectKeepAlive);
+      window.__connectKeepAlive = setInterval(function(){
+        const db2 = getDb();
+        if(!db2) return;
+        db2.ref("dreamBody/current").update({
+          connected:true,
+          t:Date.now()
+        });
+      }, 1500);
+    }catch(e){
+      console.warn("controller connect error", e);
+    }
+  }
+
+  function disconnectDream(){
+    try{
+      if(window.__connectKeepAlive) clearInterval(window.__connectKeepAlive);
+      window.__connectKeepAlive = null;
+      const db = getDb();
+      if(!db) return;
+      const now = Date.now();
+
+      db.ref("dreamBody/connectSignal").set({
+        connected:false,
+        disconnectedAt:now,
+        t:now,
+        source:"phone-disconnect"
+      });
+
+      db.ref("dreamBody/current").update({
+        connected:false,
+        disconnectedAt:now,
+        t:now,
+        touch:0,
+        motion:0,
+        breath:0,
+        heart:0
+      });
+
+      const s = document.getElementById("status");
+      if(s) s.textContent = "Disconnected · Projection Returned";
+    }catch(e){
+      console.warn("controller disconnect error", e);
+    }
+  }
+
+  function bind(){
+    const connect = document.getElementById("connect");
+    const disconnect = document.getElementById("disconnect");
+    const orb = document.getElementById("orb");
+
+    if(connect){
+      connect.onclick = connectDream;
+      connect.addEventListener("click", connectDream, true);
+    }
+    if(disconnect){
+      disconnect.onclick = disconnectDream;
+      disconnect.addEventListener("click", disconnectDream, true);
+    }
+    if(orb){
+      orb.addEventListener("touchstart", connectDream, true);
+      orb.addEventListener("mousedown", connectDream, true);
+    }
+
+    window.__connectDream = connectDream;
+    window.__disconnectDream = disconnectDream;
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", bind);
+  else bind();
+})();
+</script>
+
+
+<script>
+// ABSOLUTE_FINAL_DISCONNECT_HANDLER
+(function(){
+  function bindFinalDisconnect(){
+    var btn = document.getElementById("disconnect");
+    if(btn){
+      btn.onclick = function(){
+        try{
+          if(typeof firebase !== "undefined"){
+            const firebaseConfig = {
+              apiKey: "AIzaSyAodE6XdIzBC2l6t0FOU9MUus5_kiDoU",
+              authDomain: "dreamremembers-79da3.firebaseapp.com",
+              databaseURL: "https://dreamremembers-79da3-default-rtdb.firebaseio.com",
+              projectId: "dreamremembers-79da3",
+              storageBucket: "dreamremembers-79da3.firebasestorage.app",
+              messagingSenderId: "725634165864",
+              appId: "1:725634165864:web:6c5521ec1c004938fb5fdd",
+              measurementId: "G-7781Y6K5RP"
+            };
+            if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            var db = firebase.database();
+            var now = Date.now();
+            db.ref("dreamBody/connectSignal").set({connected:false, disconnectedAt:now, t:now});
+            db.ref("dreamBody/current").update({connected:false, touch:0, motion:0, breath:0, heart:0, t:now});
+            db.ref("dreamBody/active").set({active:false, t:now});
+            db.ref("dreamBody/activeFinal").set({active:false, t:now});
+          }
+        }catch(e){ console.warn(e); }
+        var s = document.getElementById("status");
+        if(s) s.textContent = "Disconnected · Projection Returned";
+      };
+    }
+  }
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindFinalDisconnect);
+  else bindFinalDisconnect();
+})();
+</script>
+
+
+
+
+
+
+
+<script>
+// MEMORY_LIGHT_BUTTON_LOGIC_FINAL_VISIBLE
+(function(){
+  function getDreamDb(){
+    if(typeof firebase === "undefined") return null;
+    
+const firebaseConfig = {
+  apiKey: "AIzaSyAodE6XdIzBC2l6t0FOU9MUus5_kiDoU",
+  authDomain: "dreamremembers-79da3.firebaseapp.com",
+  databaseURL: "https://dreamremembers-79da3-default-rtdb.firebaseio.com",
+  projectId: "dreamremembers-79da3",
+  storageBucket: "dreamremembers-79da3.firebasestorage.app",
+  messagingSenderId: "725634165864",
+  appId: "1:725634165864:web:6c5521ec1c004938fb5fdd",
+  measurementId: "G-7781Y6K5RP"
+};
+
+    if(!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    return firebase.database();
+  }
+
+  function addMemoryLight(){
+    try{
+      var db = getDreamDb();
+      if(!db) return;
+      var now = Date.now();
+      var light = {
+        t: now,
+        add: true,
+        x: Math.random(),
+        y: Math.random(),
+        seed: Math.random()
+      };
+
+      db.ref("dreamBody/memoryLight").set(light);
+      db.ref("dreamBody/memoryLightPulse").set(now);
+      db.ref("dreamBody/memoryLights/" + now).set(light);
+      db.ref("dreamBody/current").update({
+        t: now,
+        connected: true,
+        touch: 1,
+        memoryLightAt: now
+      });
+
+      setTimeout(function(){
+        try{ db.ref("dreamBody/current/touch").set(0); }catch(e){}
+      }, 280);
+
+      var s = document.getElementById("status");
+      if(s) s.textContent = "Memory Light Added";
+    }catch(e){
+      console.warn("add memory light error", e);
+    }
+  }
+
+  function clearMemoryLights(){
+    try{
+      var db = getDreamDb();
+      if(!db) return;
+      var now = Date.now();
+
+      db.ref("dreamBody/clearLights").set({ clear:true, t:now });
+      db.ref("dreamBody/memoryLights").remove();
+      db.ref("dreamBody/current").update({
+        t: now,
+        touch: 0,
+        clearLightsAt: now
+      });
+
+      var s = document.getElementById("status");
+      if(s) s.textContent = "All Memory Lights Cleared";
+    }catch(e){
+      console.warn("clear memory lights error", e);
+    }
+  }
+
+  function bindMemoryLightButton(){
+    var btn = document.getElementById("memoryLightBtn");
+    if(!btn) return;
+
+    var timer = null;
+    var longPressed = false;
+
+    function start(){
+      longPressed = false;
+      if(timer) clearTimeout(timer);
+      timer = setTimeout(function(){
+        longPressed = true;
+        clearMemoryLights();
+      }, 850);
+    }
+
+    function end(e){
+      if(timer) clearTimeout(timer);
+      timer = null;
+      if(!longPressed) addMemoryLight();
+      if(e && e.preventDefault) e.preventDefault();
+    }
+
+    btn.onclick = function(e){
+      if(e) e.preventDefault();
+      addMemoryLight();
+    };
+    btn.addEventListener("touchstart", start, {passive:true});
+    btn.addEventListener("touchend", end, {passive:false});
+    btn.addEventListener("mousedown", start);
+    btn.addEventListener("mouseup", end);
+    btn.addEventListener("mouseleave", function(){ if(timer) clearTimeout(timer); });
+  }
+
+  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", bindMemoryLightButton);
+  else bindMemoryLightButton();
+
+  window.__addMemoryLight = addMemoryLight;
+  window.__clearMemoryLights = clearMemoryLights;
+})();
+</script>
+
+</body>
+</html>
