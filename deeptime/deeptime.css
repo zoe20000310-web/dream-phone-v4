@@ -8,6 +8,25 @@
   --dt-mono: "SF Mono", "Menlo", "Consolas", "Courier New", monospace;
 }
 
+/* ---- loading: nothing of the original shows until the layer runs ---- */
+html:not(.dt-ready) #c, html:not(.dt-ready) #memoryLightVisibleLayer, html:not(.dt-ready) #memoryLightLayer,
+html:not(.dt-ready) .ui, html:not(.dt-ready) #openController { opacity: 0 !important; }
+#c, .ui { transition: opacity 1.6s ease; }
+#dtLoader {
+  position: fixed; inset: 0; z-index: 2147483647; display: flex; align-items: center; justify-content: center;
+  background: #050403; color: rgba(255, 242, 220, 0.86); text-align: center;
+  font-family: Georgia, "Songti SC", "STSong", "Noto Serif SC", serif; transition: opacity 1.4s ease;
+}
+html.dt-ready #dtLoader { opacity: 0; pointer-events: none; }
+.dt-load-kicker { font-size: 11px; letter-spacing: 8px; color: rgba(255, 242, 220, 0.5); }
+.dt-load-zh { font-family: "Songti SC", "STSong", "Noto Serif SC", serif; font-size: 22px; letter-spacing: 10px; margin-top: 18px; padding-left: 10px; }
+.dt-load-en { font-size: 12px; letter-spacing: 4px; font-style: italic; color: rgba(255, 242, 220, 0.45); margin-top: 8px; }
+.dt-load-bar { position: relative; width: 180px; height: 1px; margin: 26px auto 0; background: rgba(255, 242, 220, 0.12); overflow: hidden; }
+.dt-load-bar i { position: absolute; top: 0; bottom: 0; width: 40%; background: linear-gradient(90deg, transparent, rgba(255, 236, 200, 0.9), transparent); animation: dt-load 1.8s ease-in-out infinite; }
+@keyframes dt-load { from { left: -40%; } to { left: 100%; } }
+.dt-load-slow { margin-top: 22px; font-size: 11px; letter-spacing: 1.5px; color: rgba(255, 242, 220, 0.4); opacity: 0; transition: opacity 1s ease; }
+html.dt-slow .dt-load-slow { opacity: 1; }
+
 /* ---- original UI that this version replaces ------------------------ */
 #dreamWakeOverlay { display: none !important; }
 .ui .hint { display: none !important; }
@@ -134,6 +153,7 @@ body.hide-ui .dt-lineage { opacity: 0.25; }
 .dt-memory .num { font-family: var(--dt-mono); font-size: 9.5px; letter-spacing: 0.3px; }
 .dt-memory .src { font-family: var(--dt-mono); font-size: 8px; color: var(--dt-faint); }
 .dt-memory.fade { opacity: 0; transform: translateY(-14px); }
+.dt-memory.gone { opacity: 0 !important; transition: opacity 0.25s ease !important; }
 @keyframes dt-mem-in { from { opacity: 0; transform: translateY(8px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
 
 /* ---- fossil mode (hold) ------------------------------------------- */

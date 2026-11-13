@@ -339,6 +339,7 @@
     var now = performance.now();
     var dt = Math.min(0.1, (now - lastFrame) / 1000);
     lastFrame = now;
+    if (document.documentElement.classList.contains("dt-ready")) watchPerf(now);
 
     // Breath and voice push the body forward in evolution.
     var drive = 0;
@@ -771,12 +772,17 @@
   var notes = [];
   function showFossil(x, y) {
     if (!siteRecs.length) return;
-    var px = x * DPR, py = y * DPR, best = -1, bd = 1e18;
+    // Nearest site that is not already labelled: every click is a new fossil.
+    var px = x * DPR, py = y * DPR, best = -1, bd = 1e18, tNow = performance.now();
+    var labelled = {};
+    notes.forEach(function (nt) { if (tNow - nt.born < 7500) labelled[nt.k] = 1; });
     var n = Math.min(SITE_N, siteRecs.length);
     for (var k = 0; k < n; k++) {
+      if (labelled[k]) continue;
       var dx = siteX[k] * W - px, dy = siteY[k] * H - py, d = dx * dx + dy * dy;
       if (d < bd) { bd = d; best = k; }
     }
+    if (best < 0) return;
     var rec = siteRecs[best], per = PERIODS[sitePeriod];
     var c = country(rec.cc), cls = rec.c || "";
     var mid = (rec.a + rec.b) / 2;
@@ -790,15 +796,14 @@
       '<span class="num">今日 now ' + coord(rec.lat, rec.lng) + ' · ' + esc(c[0]) + ' ' + esc(c[1]) + '</span>' +
       '<span class="num">当时 then ' + coord(rec.pa, rec.pn) + ' · 漂移 drift ' + fmtInt(drift) + ' km</span>' +
       '<span class="src">PBDB occ:' + esc(rec.o) + '</span>';
-    var sx0 = siteX[best] * W / DPR, sy0 = siteY[best] * H / DPR;
-    var lx = sx0 + (sx0 < innerWidth * 0.6 ? 46 : -306), ly = sy0 - 64;
-    lx = clamp(lx, 12, innerWidth - 300);
-    ly = clamp(ly, 60, innerHeight - 190);
-    m.style.left = lx + "px";
-    m.style.top = ly + "px";
     m.style.setProperty("--period", per.color);
+    m.style.visibility = "hidden";
     memLayer.appendChild(m);
-    var note = { el: m, k: best, born: performance.now(), lx: lx, ly: ly };
+    var place = placeNote(siteX[best] * W / DPR, siteY[best] * H / DPR, m.offsetWidth, m.offsetHeight);
+    m.style.left = place.x + "px";
+    m.style.top = place.y + "px";
+    m.style.visibility = "";
+    var note = { el: m, k: best, born: performance.now(), lx: place.x, ly: place.y, w: m.offsetWidth, h: m.offsetHeight };
     notes.push(note);
     while (notes.length > 6) { var old = notes.shift(); if (old.el.parentNode) old.el.parentNode.removeChild(old.el); }
     setTimeout(function () { m.classList.add("fade"); }, 7500);
@@ -806,6 +811,48 @@
       if (m.parentNode) m.parentNode.removeChild(m);
       var i = notes.indexOf(note); if (i >= 0) notes.splice(i, 1);
     }, 10000);
+  }
+
+  // Where a new note goes: the first of several spots around its site that
+  // stays on screen and overlaps neither another note nor the fixed panels.
+  // If every spot is taken, the note in the way fades out early.
+  function overlaps(a, b, pad) {
+    return a.x < b.x + b.w + pad && a.x + a.w + pad > b.x && a.y < b.y + b.h + pad && a.y + a.h + pad > b.y;
+  }
+  function placeNote(sx, sy, w, h) {
+    var now = performance.now(), taken = [];
+    notes.forEach(function (n) {
+      if (now - n.born < 7500) taken.push({ x: n.lx, y: n.ly, w: n.w, h: n.h, note: n });
+    });
+    [".ui .title", ".dt-card", ".dt-gene.on", ".dt-lineage", ".dt-timeline", "#openController", ".dt-specimen"].forEach(function (sel) {
+      var e = document.querySelector(sel);
+      if (!e) return;
+      var r = e.getBoundingClientRect();
+      if (r.width && r.height && getComputedStyle(e).opacity > 0.05) taken.push({ x: r.left, y: r.top, w: r.width, h: r.height });
+    });
+    var right = sx < innerWidth * 0.6, gap = 46;
+    var xs = right ? [sx + gap, sx - gap - w, sx + gap * 2.2, sx - gap * 2.2 - w] : [sx - gap - w, sx + gap, sx - gap * 2.2 - w, sx + gap * 2.2];
+    var ys = [sy - h * 0.55, sy + 18, sy - h - 24, sy + h * 0.5 + 30, sy - h * 1.6, sy + h + 40];
+    var first = null;
+    for (var yi = 0; yi < ys.length; yi++) {
+      for (var xi = 0; xi < xs.length; xi++) {
+        var c = { x: clamp(xs[xi], 12, innerWidth - w - 12), y: clamp(ys[yi], 12, innerHeight - h - 60), w: w, h: h };
+        if (!first) first = c;
+        var clear = true;
+        for (var t = 0; t < taken.length; t++) if (overlaps(c, taken[t], 10)) { clear = false; break; }
+        if (clear) return c;
+      }
+    }
+    // Nowhere free: the older notes under the first spot go at once.
+    taken.forEach(function (t) {
+      if (!t.note || !overlaps(first, t, 10)) return;
+      var i = notes.indexOf(t.note);
+      if (i >= 0) notes.splice(i, 1);
+      var e = t.note.el;
+      e.classList.add("gone");
+      setTimeout(function () { if (e.parentNode) e.parentNode.removeChild(e); }, 300);
+    });
+    return first;
   }
 
   // Leader lines from each note to its site, with a small cross on the site.
@@ -818,7 +865,8 @@
       var a = clamp(age / 0.6, 0, 1) * (1 - clamp((age - 7.5) / 2.4, 0, 1));
       if (a <= 0) continue;
       var sx = siteX[n.k] * W, sy = siteY[n.k] * H;
-      var ex = (n.lx + (n.lx * DPR > sx ? 0 : 290)) * DPR, ey = (n.ly + 12) * DPR;
+      // The line meets the side of the note that faces its site.
+      var ex = (n.lx * DPR > sx ? n.lx : n.lx + n.w) * DPR, ey = (n.ly + 12) * DPR;
       ctx.strokeStyle = "rgba(255,240,215," + (0.55 * a) + ")";
       ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(ex, ey); ctx.stroke();
       var r = 7 * DPR;
@@ -961,6 +1009,7 @@
   // buffer is laid over the frame once ("lighter"), which is the same
   // additive look, at full resolution.
   var pbuf = null, pctx = null, pimg = null, pdata = null, pw = 0, ph = 0, pscale = 1;
+  var dirty = null;                 // [x0, y0, x1, y1] of last frame's particles
   function ensureParticleBuffer() {
     var sc = 1;
     var w = Math.max(1, Math.round(W * sc)), h = Math.max(1, Math.round(H * sc));
@@ -970,6 +1019,7 @@
       pctx = pbuf.getContext("2d");
       pimg = pctx.createImageData(pw, ph);
       pdata = pimg.data;
+      dirty = null;
     }
     pscale = sc;
   }
@@ -991,7 +1041,11 @@
 
     ensureParticleBuffer();
     var d = pdata, sc = pscale, w = pw, h = ph;
-    d.fill(0);
+    // Clear only where last frame's particles were.
+    if (dirty) {
+      for (var cy0 = dirty[1]; cy0 < dirty[3]; cy0++) d.fill(0, (cy0 * w + dirty[0]) * 4, (cy0 * w + dirty[2]) * 4);
+    }
+    var bx0 = w, by0 = h, bx1 = 0, by1 = 0;
     var cx = W * .52, cy = H * .48;
     var reach = Math.min(W, H) * (.48 + dreamAgitation * .25) * (window.__DT_REACH || 1);
     var a0 = .42 + dreamAgitation * .42;
@@ -1015,6 +1069,8 @@
       var x = (p.x * sc) | 0, y = (p.y * sc) | 0;
       if (x < 0 || y < 0 || x >= w || y >= h) continue;
       var side = sz < 1.5 ? 1 : sz < 2.5 ? 2 : 3;
+      if (x < bx0) bx0 = x; if (y < by0) by0 = y;
+      if (x + side > bx1) bx1 = x + side; if (y + side > by1) by1 = y + side;
       var k = a * Math.min(1, sz * sz / (side * side) + 0.15);   // light spread over the block
       var rr = r * k, gg = g * k, bb = b * k;
       for (var yy = 0; yy < side && y + yy < h; yy++) {
@@ -1024,7 +1080,12 @@
         }
       }
     }
-    pctx.putImageData(pimg, 0, 0);
+    // Upload only the union of last frame's area and this frame's.
+    if (bx1 > w) bx1 = w; if (by1 > h) by1 = h;
+    var ux0 = bx0, uy0 = by0, ux1 = bx1, uy1 = by1;
+    if (dirty) { ux0 = Math.min(ux0, dirty[0]); uy0 = Math.min(uy0, dirty[1]); ux1 = Math.max(ux1, dirty[2]); uy1 = Math.max(uy1, dirty[3]); }
+    if (ux1 > ux0 && uy1 > uy0) pctx.putImageData(pimg, 0, 0, ux0, uy0, ux1 - ux0, uy1 - uy0);
+    dirty = bx1 > bx0 && by1 > by0 ? [bx0, by0, bx1, by1] : null;
     ctx.imageSmoothingEnabled = true;
     ctx.drawImage(pbuf, 0, 0, W, H);
 
@@ -1128,11 +1189,42 @@
     ctx.drawImage(bloomA, 0, 0, W, H);
     ctx.restore();
   }
+  // Safety net for slow computers: only if the frame rate stays below 30 for
+  // two measurements in a row. Step 1: a high-density screen draws at
+  // ordinary density (particle sizes scale with it, so they look the same).
+  // Step 2: the bloom layer goes. Nothing changes on a computer that keeps up.
+  var bloomOn = true, perf = { level: 0, frames: 0, t0: 0, slow: 0 };
+  function watchPerf(now) {
+    if (document.hidden) { perf.t0 = 0; perf.frames = 0; return; }
+    if (!perf.t0) { perf.t0 = now; perf.frames = 0; return; }
+    perf.frames++;
+    var span = now - perf.t0;
+    if (span < 2000) return;
+    var fps = perf.frames * 1000 / span;
+    perf.t0 = now; perf.frames = 0;
+    perf.slow = fps < 30 ? perf.slow + 1 : 0;
+    if (perf.slow < 2 || perf.level >= 2) return;
+    perf.slow = 0;
+    perf.level++;
+    if (perf.level === 1 && DPR > 1 && typeof resize === "function") {
+      var ratio = 1 / DPR;
+      window.__DREAM_DPR_MAX = 1;
+      resize();
+      for (var i = 0; i < NP; i++) { origSize[i] *= ratio; particles[i].size *= ratio; particles[i].x *= ratio; particles[i].y *= ratio; }
+      colorsOn = -1;
+      console.info("[deeptime] slow frame rate: drawing at standard pixel density");
+    } else {
+      perf.level = 2;
+      bloomOn = false;
+      console.info("[deeptime] slow frame rate: bloom off");
+    }
+  }
+
   var origCollapse = window.drawCollapseOverlay;
   window.drawCollapseOverlay = function () {
     origCollapse();
     try { drawNotes(); drawScanHud(); } catch (err) { console.warn("[deeptime] hud", err); }
-    try { bloom(); } catch (err) {}
+    if (bloomOn) { try { bloom(); } catch (err) {} }
   };
 
   // Measuring frame around the turning specimen: corner brackets, rulers with
@@ -1395,9 +1487,28 @@
     });
   }
 
+  // While data.js was downloading, the original renderer already gathered
+  // the particles into its round flower. Scatter them like dust, so the
+  // first thing anyone sees is the first fish gathering out of the dark.
+  for (var di = 0; di < NP; di++) {
+    var dp = particles[di];
+    dp.x = Math.random() * W; dp.y = Math.random() * H;
+    dp.vx = 0; dp.vy = 0;
+  }
+
+  // Lift the loading screen once the layer has drawn a few frames of its own
+  // body (particles start scattered, so they gather out of the dark).
+  var readyFrames = 0;
+  (function waitReady() {
+    if (++readyFrames < 6) return requestAnimationFrame(waitReady);
+    document.documentElement.classList.add("dt-ready");
+    setTimeout(function () { var l = document.getElementById("dtLoader"); if (l && l.parentNode) l.parentNode.removeChild(l); }, 1800);
+  })();
+
   // For the browser console while tuning.
   window.__deepTime = {
     go: function (k) { noteInput(); evoTarget = clamp(k, 0, NS - 1); },
+    perf: function () { return { level: perf.level, bloom: bloomOn, dpr: DPR }; },
     state: function () { return { evo: evo, evoTarget: evoTarget, ma: currentMa(), auto: auto, fos: fos, hold: hold,
       specimens: specimens.map(function (r) { return r ? r.state : null; }) }; },
     start: function () { var b = document.querySelector(".dt-enter"); if (b) b.click(); },

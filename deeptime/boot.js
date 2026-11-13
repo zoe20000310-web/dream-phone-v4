@@ -70,6 +70,12 @@
     document.addEventListener("DOMContentLoaded", function () { load(0); });
   }
 
+  // If the deep-time layer has not started after 20 s, say so (the page
+  // stays covered rather than showing the original piece underneath).
+  setTimeout(function () {
+    if (!root.classList.contains("dt-ready")) root.classList.add("dt-slow");
+  }, 20000);
+
   // ---- 2. Never let a non-finite gradient stop the render loop ----------
   var proto = window.CanvasRenderingContext2D && CanvasRenderingContext2D.prototype;
   if (proto && proto.createRadialGradient) {
