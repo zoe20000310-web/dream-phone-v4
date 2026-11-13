@@ -954,6 +954,92 @@
     };
   }
 
+  // ---------------------------------------------------------------------
+  // Faster particle drawing. The original made one canvas call per particle
+  // (21,000 fillStyle + fillRect a frame, ~17 ms: the whole frame budget).
+  // Here the particles' light is added straight into a pixel buffer and the
+  // buffer is laid over the frame once ("lighter"), which is the same
+  // additive look, at full resolution.
+  var pbuf = null, pctx = null, pimg = null, pdata = null, pw = 0, ph = 0, pscale = 1;
+  function ensureParticleBuffer() {
+    var sc = 1;
+    var w = Math.max(1, Math.round(W * sc)), h = Math.max(1, Math.round(H * sc));
+    if (!pbuf || w !== pw || h !== ph) {
+      pbuf = document.createElement("canvas");
+      pbuf.width = pw = w; pbuf.height = ph = h;
+      pctx = pbuf.getContext("2d");
+      pimg = pctx.createImageData(pw, ph);
+      pdata = pimg.data;
+    }
+    pscale = sc;
+  }
+
+  // ?legacy=1 keeps the original per-particle drawing (for comparison).
+  if (params.get("legacy") !== "1") window.drawParticles = function () {
+    ctx.save();
+    ctx.globalCompositeOperation = "lighter";
+    var vanishState = smoothstep(3.25, 4.0, dreamState);
+    var core = ctx.createRadialGradient(W * .52, H * .48, 0, W * .52, H * .48, Math.min(W, H) * (.10 + dreamAgitation * .20 + lowEnergy * .06));
+    core.addColorStop(0, "rgba(255,248,225," + ((.22 + dreamAgitation * .16) * (1 - dotMode * .65) * (1 - collapse * .45)) + ")");
+    core.addColorStop(.36, "rgba(255,210,145," + ((.10 + dreamAgitation * .10) * (1 - dotMode * .6) * (1 - collapse * .5)) + ")");
+    core.addColorStop(.72, "rgba(155,205,255," + ((.035 + breathEnergy * .035) * (1 - dotMode * .6)) + ")");
+    core.addColorStop(1, "rgba(255,255,255,0)");
+    ctx.fillStyle = core;
+    ctx.globalAlpha = window.__DT_CORE == null ? 1 : window.__DT_CORE;
+    ctx.fillRect(0, 0, W, H);
+    ctx.globalAlpha = 1;
+
+    ensureParticleBuffer();
+    var d = pdata, sc = pscale, w = pw, h = ph;
+    d.fill(0);
+    var cx = W * .52, cy = H * .48;
+    var reach = Math.min(W, H) * (.48 + dreamAgitation * .25) * (window.__DT_REACH || 1);
+    var a0 = .42 + dreamAgitation * .42;
+    var lateFade = Math.max(smoothstep(0.68, 1.0, dotMode), vanishState);
+    var fade = (1 - lateFade * .82) * (1 - collapse * .45);
+    var glow = 1 + breathGlow * 1.8;
+    var dr = highEnergy * 70, dg = lowEnergy * 35, db = lowEnergy * 95 + highEnergy * 55;
+    var szK = (0.45 + dreamAgitation * .95 + highEnergy * .85 + dotMode * .25), szF = (1 - smoothstep(0.75, 1.0, dotMode) * .55);
+    var collapsing = collapse > .05, t3 = time * 3;
+    for (var i = 0; i < NP; i++) {
+      var p = particles[i], col = p.color;
+      var dx = p.x - cx, dy = p.y - cy;
+      var a = a0 - Math.sqrt(dx * dx + dy * dy) / reach;
+      if (a < .035) a = .035;
+      a *= fade * (.55 + .45 * Math.sin(t3 + p.seed)) * glow *
+           (collapsing ? (.35 + .65 * Math.random()) : (1 + highEnergy * (Math.random() * .9)));
+      if (a > 1) a = 1;
+      var r = col[0] + dr, g = col[1] + dg, b = col[2] + db;
+      if (r > 255) r = 255; if (g > 255) g = 255; if (b > 255) b = 255;
+      var sz = p.size * (szK + p.z * 0.7) * szF * sc;      // side length in buffer pixels
+      var x = (p.x * sc) | 0, y = (p.y * sc) | 0;
+      if (x < 0 || y < 0 || x >= w || y >= h) continue;
+      var side = sz < 1.5 ? 1 : sz < 2.5 ? 2 : 3;
+      var k = a * Math.min(1, sz * sz / (side * side) + 0.15);   // light spread over the block
+      var rr = r * k, gg = g * k, bb = b * k;
+      for (var yy = 0; yy < side && y + yy < h; yy++) {
+        var o = ((y + yy) * w + x) * 4;
+        for (var xx = 0; xx < side && x + xx < w; xx++, o += 4) {
+          d[o] += rr; d[o + 1] += gg; d[o + 2] += bb; d[o + 3] = 255;   // Uint8Clamped: adds and clamps
+        }
+      }
+    }
+    pctx.putImageData(pimg, 0, 0);
+    ctx.imageSmoothingEnabled = true;
+    ctx.drawImage(pbuf, 0, 0, W, H);
+
+    // The occasional motion trail, in one stroke.
+    ctx.strokeStyle = "rgba(255,236,214,0.07)";
+    ctx.lineWidth = .65 * DPR;
+    ctx.beginPath();
+    for (i = 0; i < NP; i++) {
+      var tp = particles[i];
+      if (tp.trail > .985) { ctx.moveTo(tp.x, tp.y); ctx.lineTo(tp.x - tp.vx * 8, tp.y - tp.vy * 8); }
+    }
+    ctx.stroke();
+    ctx.restore();
+  };
+
   // The flower's silk strands read as scribbles around a silhouette: off.
   window.drawStrands = function () {};
   // So does the faint "stage rectangle" the original drew in the background.
