@@ -1,0 +1,226 @@
+/* The Dream Remembers · A Body of Deep Time — overlays */
+:root {
+  --dt-ink: rgba(255, 242, 220, 0.88);
+  --dt-dim: rgba(255, 242, 220, 0.52);
+  --dt-faint: rgba(255, 242, 220, 0.30);
+  --dt-serif: Georgia, "Times New Roman", "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", serif;
+  --dt-zh: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
+  --dt-mono: "SF Mono", "Menlo", "Consolas", "Courier New", monospace;
+}
+
+/* ---- original UI that this version replaces ------------------------ */
+#dreamWakeOverlay { display: none !important; }
+.ui .hint { display: none !important; }
+html:not(.dt-debug) #err { display: none !important; }
+html.dt-kiosk, html.dt-kiosk * { cursor: none !important; }
+
+/* Phone link: only offered when Firebase is actually reachable. Small, and
+   sized with the screen so it never dominates a large projection. */
+html body #openController.phone-link { bottom: 84px !important; right: 28px !important; transition: opacity 1.2s ease !important; }
+html body #openController .final-qr {
+  width: clamp(60px, 7vmin, 104px) !important; height: clamp(60px, 7vmin, 104px) !important;
+  padding: 5px !important; border-radius: 8px !important;
+  box-shadow: 0 0 18px rgba(255,255,255,.14) !important;
+}
+html body #openController .final-qr-box { gap: 5px !important; }
+html body #openController .qr-caption { font-size: 8px !important; letter-spacing: 2px !important; }
+html body #openController .qr-subcaption { display: none !important; }
+html.dt-fossil-on body #openController.phone-link { opacity: 0 !important; pointer-events: none !important; }
+html:not(.dt-phone-live) body #openController.phone-link,
+html.dt-no-phone body #openController.phone-link {
+  opacity: 0 !important; pointer-events: none !important;
+}
+
+/* ---- overlay root -------------------------------------------------- */
+.dt-ui {
+  position: fixed; inset: 0; pointer-events: none; z-index: 1000001;
+  color: var(--dt-ink); font-family: var(--dt-serif);
+  transition: opacity 1.4s ease;
+}
+html.dt-intro-open .dt-ui { opacity: 0; }
+body.hide-ui .dt-card .dt-card-body,
+body.hide-ui .dt-gene,
+body.hide-ui .dt-lineage { opacity: 0.25; }
+
+/* ---- time + stage card (bottom left) ------------------------------- */
+.dt-card {
+  position: absolute; left: 28px; bottom: 70px; max-width: min(540px, 46vw);
+  text-shadow: 0 0 14px rgba(0, 0, 0, 0.9);
+}
+.dt-clock {
+  border-left: 3px solid var(--period, #888);
+  padding: 2px 0 2px 14px; margin-bottom: 14px;
+  transition: border-color 1.2s ease;
+}
+.dt-clock-zh { font-family: var(--dt-zh); font-size: 26px; letter-spacing: 3px; color: var(--dt-ink); }
+.dt-clock-en { font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--dt-dim); margin-top: 4px; }
+
+.dt-card-body { padding-left: 17px; transition: opacity 0.6s ease; }
+.dt-card.moving .dt-card-body { opacity: 0.22; }
+.dt-name { font-size: 21px; letter-spacing: 0.5px; }
+.dt-name i { font-style: italic; }
+.dt-name span { font-family: var(--dt-zh); font-size: 15px; letter-spacing: 3px; margin-left: 12px; color: var(--dt-dim); }
+.dt-trait { font-family: var(--dt-zh); font-size: 14px; line-height: 1.75; margin-top: 8px; letter-spacing: 1px; }
+.dt-trait em { font-family: Georgia, serif; font-style: italic; font-size: 13px; color: var(--dt-dim); letter-spacing: 0.3px; }
+.dt-where { font-size: 11px; letter-spacing: 1.5px; color: var(--dt-dim); margin-top: 10px; }
+.dt-src { font-size: 9px; letter-spacing: 1px; color: var(--dt-faint); margin-top: 6px; }
+
+/* ---- gene strand (left, under the title) --------------------------- */
+.dt-gene {
+  position: absolute; left: 28px; top: 150px; width: min(600px, 52vw);
+  opacity: 0; transition: opacity 1.2s ease; text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+}
+.dt-gene.on { opacity: 1; }
+.dt-gene-head { font-size: 12px; letter-spacing: 1.5px; color: var(--dt-dim); margin-bottom: 8px; font-family: var(--dt-zh); }
+.dt-gene-head b { font-family: var(--dt-mono); color: var(--dt-ink); font-weight: 400; letter-spacing: 3px; margin-right: 6px; }
+.dt-seq { display: flex; align-items: baseline; gap: 12px; font-family: var(--dt-mono); font-size: 11px; line-height: 1.8; }
+.dt-seq .lab { flex: 0 0 auto; width: 128px; font-family: var(--dt-zh); font-size: 10px; letter-spacing: 1px; color: var(--dt-faint); text-align: right; }
+.dt-seq .bases { white-space: nowrap; overflow: hidden; letter-spacing: 1px; }
+.dt-seq b { font-weight: 400; opacity: 0; }
+.dt-gene.on .dt-seq b { animation: dt-base 0.5s ease forwards; }
+.dt-seq b.m { color: rgba(255, 236, 200, 0.95); text-shadow: 0 0 8px rgba(255, 210, 150, 0.6); }
+.dt-seq b.x { color: rgba(140, 170, 220, 0.45); }
+@keyframes dt-base { to { opacity: 1; } }
+.dt-gene-foot { font-family: var(--dt-zh); font-size: 10px; letter-spacing: 1.5px; color: var(--dt-faint); margin-top: 8px; }
+
+/* ---- lineage (right) ----------------------------------------------- */
+.dt-lineage {
+  position: absolute; right: 32px; top: 34px; text-align: right;
+  font-size: 10px; letter-spacing: 1.6px; line-height: 1.55; transition: opacity 1s ease;
+}
+.dt-clade { color: var(--dt-ink); opacity: 0.13; transition: opacity 1.2s ease, color 1.2s ease; }
+.dt-clade.lit { opacity: 0.42; }
+.dt-clade.here { opacity: 1; color: #fff3dc; text-shadow: 0 0 12px rgba(255, 220, 170, 0.8); }
+.dt-clade.here::before { content: "● "; font-size: 7px; vertical-align: 2px; color: rgba(255, 220, 170, 0.9); }
+.dt-lineage-src { font-size: 8px; letter-spacing: 2px; color: var(--dt-faint); margin-top: 8px; text-transform: uppercase; }
+
+/* ---- geologic timeline (bottom) ------------------------------------ */
+.dt-timeline { position: absolute; left: 28px; right: 28px; bottom: 16px; }
+.dt-bar { position: relative; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, 0.05); }
+.dt-seg { position: absolute; top: 0; height: 100%; opacity: 0.55; }
+.dt-seg:first-child { border-radius: 3px 0 0 3px; }
+.dt-seg span {
+  position: absolute; bottom: 9px; left: 3px; font-family: var(--dt-zh); font-size: 9px;
+  letter-spacing: 1px; color: var(--dt-faint); white-space: nowrap;
+}
+.dt-tick {
+  position: absolute; top: -6px; width: 15px; height: 17px; margin-left: -7px;
+  pointer-events: auto; cursor: pointer;
+}
+.dt-tick::after {
+  content: ""; position: absolute; left: 5px; top: 5px; width: 5px; height: 5px; border-radius: 50%;
+  background: rgba(255, 242, 220, 0.7);
+}
+.dt-marker {
+  position: absolute; top: -12px; bottom: -12px; width: 2px; margin-left: -1px;
+  background: #fff3dc; box-shadow: 0 0 10px 2px rgba(255, 220, 170, 0.7);
+}
+.dt-scale { display: flex; justify-content: space-between; margin-top: 7px; font-size: 9px; letter-spacing: 1.5px; color: var(--dt-faint); font-family: var(--dt-zh); }
+.dt-scale .dt-credit { font-family: var(--dt-serif); font-size: 8px; letter-spacing: 1.5px; color: rgba(255, 242, 220, 0.24); text-transform: uppercase; }
+
+/* ---- fossil memories (where you click) ----------------------------- */
+.dt-memories { position: fixed; inset: 0; pointer-events: none; z-index: 1000000; }
+.dt-memory {
+  position: absolute; width: 290px; padding: 2px 0 2px 9px;
+  border-left: 1px solid var(--period, #ccc);
+  font-family: var(--dt-serif); font-size: 10px; letter-spacing: 1px; line-height: 1.6;
+  color: var(--dt-dim); text-shadow: 0 0 10px #000;
+  animation: dt-mem-in 1.4s ease both; transition: opacity 2.4s ease, transform 2.4s ease;
+}
+.dt-memory i { display: block; font-size: 15px; color: var(--dt-ink); letter-spacing: 0.4px; margin-bottom: 2px; }
+.dt-memory span { display: block; }
+.dt-memory .zh { font-family: var(--dt-zh); font-size: 12px; color: var(--dt-ink); letter-spacing: 1.5px; }
+.dt-memory .en { font-style: italic; font-size: 10px; }
+.dt-memory .num { font-family: var(--dt-mono); font-size: 9.5px; letter-spacing: 0.3px; }
+.dt-memory .src { font-family: var(--dt-mono); font-size: 8px; color: var(--dt-faint); }
+.dt-memory.fade { opacity: 0; transform: translateY(-14px); }
+@keyframes dt-mem-in { from { opacity: 0; transform: translateY(8px); filter: blur(4px); } to { opacity: 1; transform: none; filter: none; } }
+
+/* ---- fossil mode (hold) ------------------------------------------- */
+body { -webkit-user-select: none; user-select: none; -webkit-touch-callout: none; }
+.dt-fossil {
+  position: fixed; z-index: 1000000; pointer-events: none; opacity: 0;
+  mix-blend-mode: screen; filter: saturate(0.9) contrast(1.05);
+  -webkit-mask-image: radial-gradient(ellipse at center, #000 58%, transparent 80%);
+          mask-image: radial-gradient(ellipse at center, #000 58%, transparent 80%);
+}
+.dt-fossil canvas { display: block; width: 100%; height: 100%; }
+.dt-specimen {
+  position: absolute; left: 50%; top: 34px; transform: translateX(-50%);
+  width: min(560px, 80vw); text-align: center; opacity: 0;
+  text-shadow: 0 0 14px rgba(0, 0, 0, 0.95);
+}
+.dt-spec-kind { font-family: var(--dt-zh); font-size: 11px; letter-spacing: 5px; color: var(--dt-dim); text-transform: uppercase; }
+.dt-spec-name { font-size: 22px; margin-top: 8px; }
+.dt-spec-name i { font-style: italic; }
+.dt-spec-name span { font-family: var(--dt-zh); font-size: 15px; letter-spacing: 3px; margin-left: 12px; color: var(--dt-dim); }
+.dt-spec-note { font-family: var(--dt-zh); font-size: 13px; line-height: 1.7; letter-spacing: 1px; margin-top: 8px; }
+.dt-spec-note em { font-family: Georgia, serif; font-size: 12px; color: var(--dt-dim); letter-spacing: 0.3px; }
+.dt-spec-src { font-size: 9px; letter-spacing: 1px; color: var(--dt-faint); margin-top: 8px; }
+html.dt-fossil-on .dt-gene { opacity: 0 !important; }
+html.dt-fossil-on .dt-lineage { opacity: 0.12; }
+html.dt-fossil-on .dt-memory { opacity: 0.18 !important; }
+.dt-scan {
+  position: absolute; right: 32px; bottom: 84px; width: 300px; opacity: 0;
+  font-family: var(--dt-mono); font-size: 10px; color: var(--dt-ink);
+  border-top: 1px solid rgba(255,240,215,.35); padding-top: 8px; text-shadow: 0 0 10px #000;
+}
+.dt-scan-head { font-family: var(--dt-zh); font-size: 10px; letter-spacing: 3px; color: var(--dt-dim); margin-bottom: 6px; }
+.dt-scan-head b { float: right; font-weight: 400; color: #ffb38a; animation: dt-blink 1.2s steps(2) infinite; }
+@keyframes dt-blink { 50% { opacity: .2; } }
+.dt-scan .r { display: flex; justify-content: space-between; line-height: 1.75; border-bottom: 1px solid rgba(255,240,215,.06); }
+.dt-scan .k { font-family: var(--dt-zh); color: var(--dt-dim); letter-spacing: 1px; }
+.dt-scan .k em { font-family: var(--dt-mono); font-style: normal; font-size: 9px; color: var(--dt-faint); margin-left: 4px; }
+.dt-scan .v { font-variant-numeric: tabular-nums; }
+.dt-scan .v i { display: inline-block; width: 9px; height: 9px; vertical-align: -1px; margin-left: 4px; border: 1px solid rgba(255,255,255,.4); }
+.dt-scan-map { display: block; width: 100%; height: 120px; margin-top: 10px; background: rgba(255,240,215,.03); border: 1px solid rgba(255,240,215,.1); }
+.dt-scan-foot { font-size: 8px; letter-spacing: 1.5px; color: var(--dt-faint); margin-top: 4px; text-transform: uppercase; }
+html.dt-fossil-on .dt-card-body { opacity: 0.35; }
+
+/* ---- intro --------------------------------------------------------- */
+.dt-intro {
+  position: fixed; inset: 0; z-index: 2147483647; display: flex; align-items: center; justify-content: center;
+  background: radial-gradient(ellipse at 50% 45%, rgba(5, 4, 3, 0.55), rgba(5, 4, 3, 0.92) 70%);
+  color: var(--dt-ink); font-family: var(--dt-serif); text-align: center;
+  transition: opacity 1.4s ease; padding: 24px; box-sizing: border-box; overflow-y: auto;
+}
+.dt-intro.gone { opacity: 0; pointer-events: none; }
+.dt-intro-inner { max-width: 640px; }
+.dt-intro-kicker { font-size: 12px; letter-spacing: 8px; color: var(--dt-dim); }
+.dt-intro h1 { font-family: var(--dt-zh); font-weight: 400; font-size: 54px; letter-spacing: 18px; margin: 14px 0 6px; padding-left: 18px; }
+.dt-intro-sub { font-size: 13px; letter-spacing: 3px; color: var(--dt-dim); margin-bottom: 30px; font-family: var(--dt-zh); }
+.dt-intro p { font-family: var(--dt-zh); font-size: 15px; line-height: 2; letter-spacing: 1.5px; margin: 0 0 10px; }
+.dt-intro p.en { font-family: Georgia, serif; font-style: italic; font-size: 13px; letter-spacing: 0.4px; color: var(--dt-dim); line-height: 1.7; }
+.dt-enter {
+  margin: 26px 0 10px; padding: 14px 34px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(255, 242, 220, 0.42); background: rgba(255, 242, 220, 0.06);
+  color: var(--dt-ink); font: 13px var(--dt-zh); letter-spacing: 5px;
+  box-shadow: 0 0 40px rgba(255, 220, 170, 0.12); transition: background 0.4s ease, box-shadow 0.4s ease;
+}
+.dt-enter:hover { background: rgba(255, 242, 220, 0.14); box-shadow: 0 0 60px rgba(255, 220, 170, 0.25); }
+.dt-intro-note { font-size: 10px; letter-spacing: 2px; color: var(--dt-faint); font-family: var(--dt-zh); }
+.dt-howto { list-style: none; padding: 0; margin: 30px auto 0; display: inline-block; text-align: left; font-family: var(--dt-zh); font-size: 12px; line-height: 2.1; letter-spacing: 1px; color: var(--dt-dim); }
+.dt-howto b { font-weight: 400; color: var(--dt-ink); display: inline-block; min-width: 92px; }
+.dt-howto em { font-family: Georgia, serif; font-size: 11px; color: var(--dt-faint); margin-left: 8px; }
+.dt-intro-data { margin-top: 28px; font-size: 9px; letter-spacing: 2px; color: var(--dt-faint); text-transform: uppercase; }
+
+/* ---- debugging ----------------------------------------------------- */
+#dtFps { position: fixed; right: 10px; top: 8px; z-index: 2147483647; font: 11px var(--dt-mono); color: #9f9; text-shadow: 0 0 4px #000; }
+
+/* ---- small screens (a judge opening the link on a phone) ----------- */
+@media (max-width: 760px) {
+  .dt-lineage, .dt-credit, .dt-seg span { display: none; }
+  .dt-card { left: 16px; right: 16px; bottom: 54px; max-width: none; }
+  .dt-clock-zh { font-size: 20px; }
+  .dt-name { font-size: 17px; }
+  .dt-trait { font-size: 12px; }
+  .dt-gene { left: 16px; right: 16px; width: auto; top: 118px; }
+  .dt-seq .lab { width: 70px; }
+  .dt-timeline { left: 16px; right: 16px; }
+  .dt-intro h1 { font-size: 40px; letter-spacing: 12px; }
+  .dt-specimen { top: 118px; }
+  .dt-scan { display: none; }
+  .dt-memory { width: 230px; }
+  .dt-spec-name { font-size: 17px; }
+  .dt-howto em { display: none; }
+}

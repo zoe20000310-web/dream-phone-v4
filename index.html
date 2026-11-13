@@ -3,7 +3,11 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>The Dream Remembers</title>
+<title>The Dream Remembers · A Body of Deep Time</title>
+<meta name="description" content="梦记得：一具身体的深时记忆 — an interactive body that evolves from fish to human, built from open science data (PBDB, Macrostrat, Ensembl, Open Tree of Life, PhyloPic)." />
+<link rel="icon" href="data:," />
+<script src="deeptime/boot.js"></script>
+<link rel="stylesheet" href="deeptime/deeptime.css" />
 <style>
   html, body {
     margin: 0;
@@ -623,7 +627,7 @@ body.waiting-this-session .phone-link{
 }
 </style>
 
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-app-compat.js">
+<script type="text/plain" data-note="inline code beside a src attribute never ran in the original; kept for reference">
 window.addEventListener('error',(e)=>{
   if(String(e.message||'').includes('createRadialGradient')){
     location.reload();
@@ -707,7 +711,7 @@ function renderMemoryLights(){
 renderMemoryLights();
 
 </script>
-<script src="https://www.gstatic.com/firebasejs/10.12.5/firebase-database-compat.js"></script>
+
 </head>
 <body>
 
@@ -726,7 +730,7 @@ renderMemoryLights();
 <div class="ui">
   <div class="title">
     <h1>THE DREAM REMEMBERS</h1>
-    <p>an interactive memory of light, breath, and touch</p>
+    <p>a body of deep time · 一具身体的深时记忆</p>
   </div>
   <div class="help">
     Click · Memory Light<br>
@@ -758,7 +762,7 @@ const canvas = document.getElementById("c");
 const ctx = canvas.getContext("2d", { alpha:false });
 let W, H, DPR;
 function resize(){
-  DPR = Math.min(window.devicePixelRatio || 1, 2);
+  DPR = Math.min(window.devicePixelRatio || 1, window.__DREAM_DPR_MAX || 2);
   W = canvas.width = innerWidth * DPR;
   H = canvas.height = innerHeight * DPR;
   canvas.style.width = innerWidth + "px";
@@ -1579,7 +1583,7 @@ function drawBackground(){
 
   // subtle stage rectangle glow
   ctx.save();
-  ctx.globalAlpha = .18;
+  ctx.globalAlpha = .18 * (window.__DT_FRAME == null ? 1 : window.__DT_FRAME);
   ctx.strokeStyle = "rgba(255,245,220,.12)";
   ctx.lineWidth = 1*DPR;
   ctx.strokeRect(W*.075, H*.15, W*.85, H*.68);
@@ -1924,12 +1928,14 @@ function drawParticles(){
   core.addColorStop(.72, `rgba(155,205,255,${(.035 + breathEnergy*.035) * (1-dotMode*.6)})`);
   core.addColorStop(1, "rgba(255,255,255,0)");
   ctx.fillStyle = core;
+  ctx.globalAlpha = (window.__DT_CORE == null ? 1 : window.__DT_CORE);
   ctx.fillRect(0,0,W,H);
+  ctx.globalAlpha = 1;
 
   for(let p of particles){
     const [r,g,b] = p.color;
     const dist = Math.hypot(p.x-W*.52,p.y-H*.48);
-    let a = Math.max(.035, (.42 + dreamAgitation*.42) - dist/(Math.min(W,H)*(.48 + dreamAgitation*.25)));
+    let a = Math.max(.035, (.42 + dreamAgitation*.42) - dist/(Math.min(W,H)*(.48 + dreamAgitation*.25)*(window.__DT_REACH || 1)));
     // particles stay visible during the early T transition, then fade near the end
     const lateFade = Math.max(smoothstep(0.68, 1.0, dotMode), vanishState);
     a *= (1 - lateFade*.82) * (1 - collapse*.45);
@@ -2322,7 +2328,7 @@ function applyPhoneBodyControl(){
 
 
 // FORCE FIREBASE BODY LINK READER
-(function(){
+window.__whenFirebase(function(){
   function setPhoneStatus(text){
     const el = document.getElementById("phoneStatus");
     if(el) el.textContent = text;
@@ -2401,7 +2407,7 @@ const firebaseConfig = {
     console.warn("Firebase setup error:", err);
     setPhoneStatus("Firebase setup error.");
   }
-})();
+});
 
 
 function safeDreamNumber(v, fallback=0){
@@ -2479,6 +2485,7 @@ function forceApplyPhoneBodyControl(){
 }
 
 function loop(){
+  requestAnimationFrame(loop);
   forceApplyPhoneBodyControl();
   time += 0.016;
   tunnel += (tunnelTarget - tunnel) * 0.055;
@@ -2526,7 +2533,6 @@ function loop(){
     ctx.fillRect(Math.random()*W, Math.random()*H, 1, 1);
   }
   ctx.restore();
-  requestAnimationFrame(loop);
 }
 loop();
 </script>
@@ -2604,7 +2610,7 @@ loop();
     const ov = ensureOverlay();
     ov.classList.remove("hide");
     ov.classList.remove("timestamp-hide");
-    ov.style.setProperty("display", "flex", "important");
+    ov.style.setProperty("display", "none", "important");
     ov.style.setProperty("opacity", "1", "important");
     ov.style.setProperty("visibility", "visible", "important");
   }
@@ -2689,8 +2695,7 @@ const firebaseConfig = {
     }
   }
 
-  if(document.readyState === "loading") document.addEventListener("DOMContentLoaded", init);
-  else init();
+  window.__whenFirebase(init);
 })();
 </script>
 
@@ -2849,7 +2854,7 @@ const firebaseConfig = {
     ctx = canvas.getContext("2d");
     resize();
     window.addEventListener("resize", resize);
-    initFirebase();
+    window.__whenFirebase(initFirebase);
     render();
 
     window.__addVisibleMemoryLight = addVisibleMemoryLight;
@@ -2861,5 +2866,7 @@ const firebaseConfig = {
 })();
 </script>
 
+<script src="deeptime/data.js"></script>
+<script src="deeptime/deeptime.js"></script>
 </body>
 </html>
